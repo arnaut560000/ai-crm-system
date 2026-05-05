@@ -14,7 +14,7 @@ It is built as a simple first sellable version with lead capture, editing, statu
 - Search leads by name, email, company, or phone
 - Filter leads by status
 - Track deal value and follow-up dates
-- Dashboard analytics for status distribution and pipeline value
+- Dashboard analytics for lead mix, conversion health, and pipeline value
 - Follow-up focus panel for the next active follow-ups
 - Notes and activity history
 - Separate activity notes on lead records

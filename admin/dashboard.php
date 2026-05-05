@@ -236,56 +236,125 @@ function ai_crm_metric($label, $value, $caption) {
 }
 
 function ai_crm_render_analytics($analytics, $followups, $stats) {
-    $max_count = 1;
-    $max_value = 1;
+    $total_leads = max(1, (int) $stats['total']);
+    $pipeline_groups = array(
+        'open' => array(
+            'label' => __('Open Pipeline', 'ai-crm-system'),
+            'value' => 0.0,
+            'caption' => __('Active opportunities', 'ai-crm-system'),
+            'class' => 'open',
+        ),
+        'won' => array(
+            'label' => __('Won Deals', 'ai-crm-system'),
+            'value' => 0.0,
+            'caption' => __('Closed revenue', 'ai-crm-system'),
+            'class' => 'won',
+        ),
+        'lost' => array(
+            'label' => __('Lost Deals', 'ai-crm-system'),
+            'value' => 0.0,
+            'caption' => __('Closed lost value', 'ai-crm-system'),
+            'class' => 'lost',
+        ),
+    );
 
+    $active_count = 0;
+    $won_count = 0;
+    $lost_count = 0;
     foreach ($analytics as $item) {
-        $max_count = max($max_count, (int) $item['count']);
-        $max_value = max($max_value, (float) $item['value']);
+        if ($item['key'] === 'won') {
+            $pipeline_groups['won']['value'] += (float) $item['value'];
+            $won_count += (int) $item['count'];
+            continue;
+        }
+
+        if ($item['key'] === 'lost') {
+            $pipeline_groups['lost']['value'] += (float) $item['value'];
+            $lost_count += (int) $item['count'];
+            continue;
+        }
+
+        $pipeline_groups['open']['value'] += (float) $item['value'];
+        $active_count += (int) $item['count'];
     }
+
+    $max_pipeline = 1;
+    foreach ($pipeline_groups as $group) {
+        $max_pipeline = max($max_pipeline, (float) $group['value']);
+    }
+
+    $active_percent = round(($active_count / $total_leads) * 100);
+    $won_percent = round(($won_count / $total_leads) * 100);
+    $lost_percent = round(($lost_count / $total_leads) * 100);
     ?>
     <section class="ai-crm-analytics" aria-label="<?php esc_attr_e('CRM analytics', 'ai-crm-system'); ?>">
-        <article class="ai-crm-panel ai-crm-chart-panel">
+        <article class="ai-crm-panel ai-crm-distribution-panel">
             <div class="ai-crm-panel-heading">
                 <div>
                     <h2><?php esc_html_e('Status Distribution', 'ai-crm-system'); ?></h2>
-                    <span><?php esc_html_e('Where every lead sits right now', 'ai-crm-system'); ?></span>
+                    <span><?php esc_html_e('Lead mix by pipeline stage', 'ai-crm-system'); ?></span>
                 </div>
             </div>
-            <div class="ai-crm-bars">
+            <div class="ai-crm-status-stack" aria-hidden="true">
                 <?php foreach ($analytics as $item) : ?>
-                    <?php $width = max(6, round(((int) $item['count'] / $max_count) * 100)); ?>
-                    <div class="ai-crm-bar-row">
-                        <div class="ai-crm-bar-label">
+                    <?php if ((int) $item['count'] < 1) { continue; } ?>
+                    <?php $width = max(5, round(((int) $item['count'] / $total_leads) * 100)); ?>
+                    <span class="ai-crm-stack-segment ai-crm-stack-<?php echo esc_attr($item['tone']); ?>" style="width: <?php echo esc_attr($width); ?>%;"></span>
+                <?php endforeach; ?>
+            </div>
+            <div class="ai-crm-distribution-grid">
+                <?php foreach ($analytics as $item) : ?>
+                    <?php $percent = round(((int) $item['count'] / $total_leads) * 100); ?>
+                    <div class="ai-crm-distribution-item">
+                        <span class="ai-crm-legend-dot ai-crm-stack-<?php echo esc_attr($item['tone']); ?>"></span>
+                        <div>
                             <span><?php echo esc_html($item['label']); ?></span>
-                            <strong><?php echo esc_html(number_format_i18n($item['count'])); ?></strong>
-                        </div>
-                        <div class="ai-crm-bar-track" aria-hidden="true">
-                            <span class="ai-crm-bar ai-crm-bar-<?php echo esc_attr($item['tone']); ?>" style="width: <?php echo esc_attr($width); ?>%;"></span>
+                            <strong>
+                                <?php
+                                printf(
+                                    esc_html__('%1$s leads, %2$s%%', 'ai-crm-system'),
+                                    esc_html(number_format_i18n((int) $item['count'])),
+                                    esc_html(number_format_i18n($percent))
+                                );
+                                ?>
+                            </strong>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
+            <div class="ai-crm-health-row">
+                <div>
+                    <strong><?php echo esc_html(number_format_i18n($active_percent)); ?>%</strong>
+                    <span><?php esc_html_e('Active', 'ai-crm-system'); ?></span>
+                </div>
+                <div>
+                    <strong><?php echo esc_html(number_format_i18n($won_percent)); ?>%</strong>
+                    <span><?php esc_html_e('Won', 'ai-crm-system'); ?></span>
+                </div>
+                <div>
+                    <strong><?php echo esc_html(number_format_i18n($lost_percent)); ?>%</strong>
+                    <span><?php esc_html_e('Lost', 'ai-crm-system'); ?></span>
+                </div>
+            </div>
         </article>
 
-        <article class="ai-crm-panel ai-crm-chart-panel">
+        <article class="ai-crm-panel ai-crm-pipeline-panel">
             <div class="ai-crm-panel-heading">
                 <div>
                     <h2><?php esc_html_e('Pipeline Value', 'ai-crm-system'); ?></h2>
-                    <span><?php esc_html_e('Deal value grouped by status', 'ai-crm-system'); ?></span>
+                    <span><?php esc_html_e('Open value compared with closed outcomes', 'ai-crm-system'); ?></span>
                 </div>
             </div>
-            <div class="ai-crm-bars">
-                <?php foreach ($analytics as $item) : ?>
-                    <?php $width = max(6, round(((float) $item['value'] / $max_value) * 100)); ?>
-                    <div class="ai-crm-bar-row">
-                        <div class="ai-crm-bar-label">
-                            <span><?php echo esc_html($item['label']); ?></span>
-                            <strong><?php echo esc_html(ai_crm_money($item['value'])); ?></strong>
+            <div class="ai-crm-column-chart">
+                <?php foreach ($pipeline_groups as $group) : ?>
+                    <?php $height = max(8, round(((float) $group['value'] / $max_pipeline) * 100)); ?>
+                    <div class="ai-crm-column-item">
+                        <strong><?php echo esc_html(ai_crm_money($group['value'])); ?></strong>
+                        <div class="ai-crm-column-track" aria-hidden="true">
+                            <span class="ai-crm-column ai-crm-column-<?php echo esc_attr($group['class']); ?>" style="height: <?php echo esc_attr($height); ?>%;"></span>
                         </div>
-                        <div class="ai-crm-bar-track" aria-hidden="true">
-                            <span class="ai-crm-bar ai-crm-bar-<?php echo esc_attr($item['tone']); ?>" style="width: <?php echo esc_attr($width); ?>%;"></span>
-                        </div>
+                        <span><?php echo esc_html($group['label']); ?></span>
+                        <small><?php echo esc_html($group['caption']); ?></small>
                     </div>
                 <?php endforeach; ?>
             </div>

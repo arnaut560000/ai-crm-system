@@ -109,7 +109,7 @@
 .ai-crm-analytics {
     display: grid;
     gap: 18px;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 0.8fr);
+    grid-template-columns: minmax(360px, 1.15fr) minmax(320px, 0.85fr) minmax(280px, 0.85fr);
     margin-bottom: 18px;
 }
 
@@ -206,58 +206,157 @@
     margin: 0 0 4px;
 }
 
-.ai-crm-chart-panel,
+.ai-crm-distribution-panel,
+.ai-crm-pipeline-panel,
 .ai-crm-followup-panel {
     min-width: 0;
 }
 
-.ai-crm-bars {
-    display: grid;
-    gap: 14px;
-}
-
-.ai-crm-bar-row {
-    display: grid;
-    gap: 8px;
-}
-
-.ai-crm-bar-label {
-    align-items: center;
-    display: flex;
-    gap: 12px;
-    justify-content: space-between;
-}
-
-.ai-crm-bar-label span {
-    color: #334155;
-    font-weight: 700;
-}
-
-.ai-crm-bar-label strong {
-    color: #0f172a;
-    font-size: 13px;
-}
-
-.ai-crm-bar-track {
+.ai-crm-status-stack {
     background: #edf2f7;
     border-radius: 999px;
-    height: 9px;
+    display: flex;
+    height: 18px;
     overflow: hidden;
 }
 
-.ai-crm-bar {
-    border-radius: 999px;
+.ai-crm-stack-segment {
     display: block;
     height: 100%;
-    min-width: 8px;
 }
 
-.ai-crm-bar-blue { background: #3b82f6; }
-.ai-crm-bar-violet { background: #8b5cf6; }
-.ai-crm-bar-green { background: #22c55e; }
-.ai-crm-bar-amber { background: #f59e0b; }
-.ai-crm-bar-emerald { background: #14b8a6; }
-.ai-crm-bar-slate { background: #64748b; }
+.ai-crm-distribution-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 18px;
+}
+
+.ai-crm-distribution-item {
+    align-items: flex-start;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    gap: 10px;
+    padding: 11px;
+}
+
+.ai-crm-distribution-item span,
+.ai-crm-distribution-item strong {
+    display: block;
+}
+
+.ai-crm-distribution-item span:not(.ai-crm-legend-dot) {
+    color: #334155;
+    font-weight: 800;
+}
+
+.ai-crm-distribution-item strong {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.ai-crm-legend-dot {
+    border-radius: 999px;
+    flex: 0 0 10px;
+    height: 10px;
+    margin-top: 4px;
+    width: 10px;
+}
+
+.ai-crm-stack-blue { background: #3b82f6; }
+.ai-crm-stack-violet { background: #8b5cf6; }
+.ai-crm-stack-green { background: #22c55e; }
+.ai-crm-stack-amber { background: #f59e0b; }
+.ai-crm-stack-emerald { background: #14b8a6; }
+.ai-crm-stack-slate { background: #64748b; }
+
+.ai-crm-health-row {
+    border-top: 1px solid #e2e8f0;
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 18px;
+    padding-top: 16px;
+}
+
+.ai-crm-health-row div {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.ai-crm-health-row strong,
+.ai-crm-health-row span {
+    display: block;
+}
+
+.ai-crm-health-row strong {
+    color: #0f172a;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.ai-crm-health-row span {
+    color: #64748b;
+    margin-top: 5px;
+}
+
+.ai-crm-column-chart {
+    align-items: end;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-height: 250px;
+}
+
+.ai-crm-column-item {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    text-align: center;
+}
+
+.ai-crm-column-item strong {
+    color: #0f172a;
+    font-size: 16px;
+}
+
+.ai-crm-column-item > span {
+    color: #334155;
+    font-weight: 800;
+}
+
+.ai-crm-column-item small {
+    color: #64748b;
+    min-height: 30px;
+}
+
+.ai-crm-column-track {
+    align-items: end;
+    background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    height: 140px;
+    justify-content: center;
+    overflow: hidden;
+    padding: 8px;
+}
+
+.ai-crm-column {
+    border-radius: 6px 6px 3px 3px;
+    display: block;
+    min-height: 8px;
+    width: 100%;
+}
+
+.ai-crm-column-open { background: #0f766e; }
+.ai-crm-column-won { background: #14b8a6; }
+.ai-crm-column-lost { background: #64748b; }
 
 .ai-crm-focus-list {
     display: grid;

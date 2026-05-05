@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.1
+
+- Reworked dashboard analytics so status distribution shows lead mix percentages and active/won/lost health.
+- Replaced the pipeline value status list with a cleaner open/won/lost value graph.
+- Improved analytics copy so the dashboard reads like a CRM decision panel instead of decorative charts.
+
 ## 1.6.0
 
 - Added dashboard analytics for lead status distribution.

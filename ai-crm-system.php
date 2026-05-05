@@ -2,7 +2,7 @@
 /**
  * Plugin Name: AI CRM System
  * Description: A clean WordPress CRM for leads, follow-ups, notes, pipeline status, and CSV export.
- * Version: 1.6.0
+ * Version: 1.6.1
  * Author: Arnaut
  * Requires at least: 6.0
  * Requires PHP: 7.4
@@ -11,7 +11,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-define('AI_CRM_VERSION', '1.6.0');
+define('AI_CRM_VERSION', '1.6.1');
 define('AI_CRM_PLUGIN_FILE', __FILE__);
 define('AI_CRM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_CRM_PLUGIN_URL', plugin_dir_url(__FILE__));

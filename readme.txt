@@ -4,7 +4,7 @@ Tags: crm, leads, sales, follow-up, admin
 Requires at least: 6.0
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: MIT
 License URI: https://opensource.org/licenses/MIT
 
@@ -47,6 +47,9 @@ Not by default. Data is deleted only if the delete-data-on-uninstall setting is 
 Users with the `manage_options` capability.
 
 == Changelog ==
+
+= 1.6.1 =
+* Reworked dashboard analytics into a clearer status distribution and pipeline value graph.
 
 = 1.6.0 =
 * Added lightweight dashboard analytics and follow-up focus panels.
