@@ -36,6 +36,8 @@ Screenshots can be added here before release:
 3. Settings page
 4. CSV export workflow
 
+Place screenshot files in the `screenshots/` folder.
+
 ## Requirements
 
 - WordPress 6.0 or newer

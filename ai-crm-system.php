@@ -4,6 +4,9 @@
  * Description: A modern CRM workspace inside WordPress for tracking leads, pipeline status, follow-ups, and notes.
  * Version: 1.2.0
  * Author: Arnaut
+ * Requires at least: 6.0
+ * Requires PHP: 7.4
+ * Text Domain: ai-crm-system
  */
 
 if (!defined('ABSPATH')) {
