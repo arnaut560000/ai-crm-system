@@ -44,11 +44,12 @@ function ai_crm_dashboard() {
         </section>
 
         <div class="ai-crm-grid">
-            <section class="ai-crm-panel" id="ai-crm-lead-form">
-                <div class="ai-crm-panel-heading">
-                    <h2><?php echo $edit_lead ? esc_html__('Edit Lead', 'ai-crm-system') : esc_html__('Add New Lead', 'ai-crm-system'); ?></h2>
-                    <span><?php echo $edit_lead ? esc_html__('Update the selected lead', 'ai-crm-system') : esc_html__('Capture a new opportunity', 'ai-crm-system'); ?></span>
-                </div>
+            <section class="ai-crm-side-stack">
+            <details class="ai-crm-panel ai-crm-lead-details" id="ai-crm-lead-form" <?php echo $edit_lead ? 'open' : ''; ?>>
+                <summary>
+                    <span><?php echo $edit_lead ? esc_html__('Edit Lead', 'ai-crm-system') : esc_html__('Add New Lead', 'ai-crm-system'); ?></span>
+                    <small><?php echo $edit_lead ? esc_html__('Update selected record', 'ai-crm-system') : esc_html__('Open form', 'ai-crm-system'); ?></small>
+                </summary>
 
                 <form method="post" class="ai-crm-form">
                     <?php if ($edit_lead) : ?>
@@ -111,6 +112,9 @@ function ai_crm_dashboard() {
                 </form>
 
                 <?php ai_crm_render_activity($activities, $edit_lead); ?>
+            </details>
+
+            <?php ai_crm_render_import_panel(); ?>
             </section>
 
             <section class="ai-crm-panel ai-crm-list-panel">
@@ -135,10 +139,27 @@ function ai_crm_dashboard() {
                 </div>
 
                 <?php if ($leads) : ?>
+                    <form method="post" class="ai-crm-bulk-form">
+                        <?php wp_nonce_field('ai_crm_bulk_action'); ?>
+                        <input type="hidden" name="ai_crm_bulk_action" value="1">
+                        <div class="ai-crm-bulk-bar">
+                            <select name="bulk_action">
+                                <option value=""><?php esc_html_e('Bulk Actions', 'ai-crm-system'); ?></option>
+                                <option value="status"><?php esc_html_e('Change Status', 'ai-crm-system'); ?></option>
+                                <option value="delete"><?php esc_html_e('Delete', 'ai-crm-system'); ?></option>
+                            </select>
+                            <select name="bulk_status">
+                                <?php foreach ($statuses as $key => $status) : ?>
+                                    <option value="<?php echo esc_attr($key); ?>"><?php echo esc_html($status['label']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" class="button"><?php esc_html_e('Apply', 'ai-crm-system'); ?></button>
+                        </div>
                     <div class="ai-crm-table-scroll">
                         <table class="ai-crm-table">
                             <thead>
                                 <tr>
+                                    <th><input type="checkbox" class="ai-crm-check-all" aria-label="<?php esc_attr_e('Select all leads', 'ai-crm-system'); ?>"></th>
                                     <th><?php esc_html_e('Lead', 'ai-crm-system'); ?></th>
                                     <th><?php esc_html_e('Status', 'ai-crm-system'); ?></th>
                                     <th><?php esc_html_e('Value', 'ai-crm-system'); ?></th>
@@ -155,6 +176,7 @@ function ai_crm_dashboard() {
                             </tbody>
                         </table>
                     </div>
+                    </form>
                 <?php else : ?>
                     <div class="ai-crm-empty">
                         <h3><?php esc_html_e('No leads found', 'ai-crm-system'); ?></h3>
@@ -165,6 +187,17 @@ function ai_crm_dashboard() {
             </section>
         </div>
     </div>
+    <script>
+    document.addEventListener('change', function (event) {
+        if (!event.target.classList.contains('ai-crm-check-all')) {
+            return;
+        }
+
+        document.querySelectorAll('input[name="lead_ids[]"]').forEach(function (checkbox) {
+            checkbox.checked = event.target.checked;
+        });
+    });
+    </script>
     <?php
 }
 
@@ -174,6 +207,9 @@ function ai_crm_render_notice() {
         'updated' => 'Lead updated.',
         'deleted' => 'Lead deleted.',
         'activity_added' => 'Activity note added.',
+        'bulk_updated' => 'Bulk action completed.',
+        'imported' => 'CSV import completed.',
+        'import_failed' => 'CSV import failed. Check the file format.',
     );
     $key = sanitize_key($_GET['message'] ?? '');
     if (isset($messages[$key])) {
@@ -188,6 +224,24 @@ function ai_crm_metric($label, $value, $caption) {
         <strong><?php echo esc_html($value); ?></strong>
         <small><?php echo esc_html($caption); ?></small>
     </article>
+    <?php
+}
+
+function ai_crm_render_import_panel() {
+    ?>
+    <details class="ai-crm-panel ai-crm-import-panel">
+        <summary>
+            <span><?php esc_html_e('Import Leads', 'ai-crm-system'); ?></span>
+            <small><?php esc_html_e('CSV upload', 'ai-crm-system'); ?></small>
+        </summary>
+        <form method="post" enctype="multipart/form-data" class="ai-crm-import-form">
+            <?php wp_nonce_field('ai_crm_import_csv'); ?>
+            <input type="hidden" name="ai_crm_import_csv" value="1">
+            <input type="file" name="ai_crm_csv" accept=".csv" required>
+            <p class="description"><?php esc_html_e('Required columns: name, email. Optional: phone, company, status, source, deal_value, next_follow_up, notes.', 'ai-crm-system'); ?></p>
+            <button type="submit" class="button"><?php esc_html_e('Import CSV', 'ai-crm-system'); ?></button>
+        </form>
+    </details>
     <?php
 }
 
@@ -237,6 +291,7 @@ function ai_crm_render_lead_row($lead, $statuses) {
     $is_due = $follow_up_time && $follow_up_time <= current_time('timestamp');
     ?>
     <tr>
+        <td><input type="checkbox" name="lead_ids[]" value="<?php echo esc_attr($lead->id); ?>" aria-label="<?php echo esc_attr(sprintf(__('Select %s', 'ai-crm-system'), $lead->name)); ?>"></td>
         <td>
             <div class="ai-crm-lead-name"><?php echo esc_html($lead->name); ?></div>
             <a href="mailto:<?php echo esc_attr($lead->email); ?>"><?php echo esc_html($lead->email); ?></a>

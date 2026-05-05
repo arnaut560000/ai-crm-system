@@ -177,6 +177,15 @@ function ai_crm_get_lead_count() {
     return (int) ($query['params'] ? $wpdb->get_var($wpdb->prepare($query['sql'], $query['params'])) : $wpdb->get_var($query['sql']));
 }
 
+function ai_crm_get_export_leads() {
+    global $wpdb;
+
+    $query = ai_crm_build_leads_query();
+    $sql = $query['sql'] . ' ORDER BY updated_at DESC, id DESC';
+
+    return $query['params'] ? $wpdb->get_results($wpdb->prepare($sql, $query['params'])) : $wpdb->get_results($sql);
+}
+
 function ai_crm_build_leads_query($select = '*') {
     global $wpdb;
 

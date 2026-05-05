@@ -13,6 +13,8 @@ Use this before packaging AI CRM System for a public beta or paid release.
 - Update status from the leads table.
 - Delete a test lead.
 - Export CSV with and without filters.
+- Import CSV with valid and invalid files.
+- Test bulk status changes and bulk delete.
 - Save settings for currency, default status, leads per page, and uninstall cleanup.
 
 ## Security Review

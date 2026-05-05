@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.0
+
+- Added CSV import from the dashboard.
+- Added bulk lead actions for status changes and deletion.
+- Made the add/edit lead form collapsible to give the leads table more room.
+
 ## 1.4.0
 
 - Added paginated leads table with configurable records per page.

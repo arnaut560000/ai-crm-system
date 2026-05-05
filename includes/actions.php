@@ -38,6 +38,20 @@ function ai_crm_handle_actions() {
         exit;
     }
 
+    if (isset($_POST['ai_crm_bulk_action'])) {
+        check_admin_referer('ai_crm_bulk_action');
+        ai_crm_handle_bulk_action();
+        wp_safe_redirect(ai_crm_admin_url(array('message' => 'bulk_updated')));
+        exit;
+    }
+
+    if (isset($_POST['ai_crm_import_csv'])) {
+        check_admin_referer('ai_crm_import_csv');
+        $result = ai_crm_import_csv();
+        wp_safe_redirect(ai_crm_admin_url(array('message' => $result ? 'imported' : 'import_failed')));
+        exit;
+    }
+
     if (isset($_GET['ai_crm_delete'], $_GET['_wpnonce'])) {
         $lead_id = absint($_GET['ai_crm_delete']);
         $nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
@@ -71,7 +85,7 @@ function ai_crm_export_csv() {
     fputcsv($output, array('Name', 'Email', 'Phone', 'Company', 'Status', 'Source', 'Deal Value', 'Next Follow-up', 'Notes', 'Created At', 'Updated At'));
 
     $statuses = ai_crm_statuses();
-    foreach (ai_crm_get_leads() as $lead) {
+    foreach (ai_crm_get_export_leads() as $lead) {
         fputcsv($output, array(
             $lead->name,
             $lead->email,
@@ -88,4 +102,90 @@ function ai_crm_export_csv() {
     }
 
     fclose($output);
+}
+
+function ai_crm_handle_bulk_action() {
+    $lead_ids = array_filter(array_map('absint', (array) ($_POST['lead_ids'] ?? array())));
+    $bulk_action = sanitize_key($_POST['bulk_action'] ?? '');
+
+    if (!$lead_ids || $bulk_action === '') {
+        return;
+    }
+
+    if ($bulk_action === 'delete') {
+        foreach ($lead_ids as $lead_id) {
+            ai_crm_delete_lead($lead_id);
+        }
+        return;
+    }
+
+    if ($bulk_action === 'status') {
+        $status = sanitize_key($_POST['bulk_status'] ?? '');
+        foreach ($lead_ids as $lead_id) {
+            ai_crm_update_status($lead_id, $status);
+        }
+    }
+}
+
+function ai_crm_import_csv() {
+    if (empty($_FILES['ai_crm_csv']['tmp_name'])) {
+        return false;
+    }
+
+    $file = $_FILES['ai_crm_csv'];
+    $extension = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+    if ($extension !== 'csv' || !is_uploaded_file($file['tmp_name'])) {
+        return false;
+    }
+
+    $handle = fopen($file['tmp_name'], 'r');
+    if (!$handle) {
+        return false;
+    }
+
+    $headers = fgetcsv($handle);
+    if (!$headers) {
+        fclose($handle);
+        return false;
+    }
+
+    $headers = array_map('ai_crm_normalize_csv_header', $headers);
+    $imported = 0;
+
+    while (($row = fgetcsv($handle)) !== false) {
+        $data = array();
+        foreach ($headers as $index => $header) {
+            $data[$header] = $row[$index] ?? '';
+        }
+
+        if (empty($data['name']) || empty($data['email'])) {
+            continue;
+        }
+
+        ai_crm_save_lead(array(
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? '',
+            'company' => $data['company'] ?? '',
+            'status' => $data['status'] ?? ai_crm_get_setting('default_status'),
+            'source' => $data['source'] ?? 'Other',
+            'deal_value' => $data['deal_value'] ?? 0,
+            'next_follow_up' => $data['next_follow_up'] ?? '',
+            'notes' => $data['notes'] ?? '',
+        ));
+        $imported++;
+    }
+
+    fclose($handle);
+    return $imported > 0;
+}
+
+function ai_crm_normalize_csv_header($header) {
+    $header = strtolower(trim((string) $header));
+    $header = str_replace(array(' ', '-'), '_', $header);
+    $aliases = array(
+        'value' => 'deal_value',
+        'follow_up' => 'next_follow_up',
+    );
+    return $aliases[$header] ?? $header;
 }

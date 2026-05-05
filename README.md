@@ -8,7 +8,9 @@ It is built as a simple first sellable version with lead capture, editing, statu
 
 - AI CRM admin menu inside WordPress
 - Add, edit, and delete leads
+- Bulk delete leads or bulk change status
 - Update lead status from the leads table
+- Import leads from CSV
 - Search leads by name, email, company, or phone
 - Filter leads by status
 - Track deal value and follow-up dates
@@ -62,6 +64,8 @@ Add screenshots to the `screenshots/` folder before release:
 12. Click `Export CSV` and confirm a CSV file downloads.
 13. Open `AI CRM > Settings`, change currency/default status, and save.
 14. Change `Leads Per Page` and confirm pagination behaves correctly after adding enough leads.
+15. Import a CSV with `name,email` columns.
+16. Select multiple leads and test bulk status change or bulk delete.
 
 ## Uninstall Behavior
 

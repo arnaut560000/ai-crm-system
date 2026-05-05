@@ -77,6 +77,11 @@
     grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
 }
 
+.ai-crm-side-stack {
+    display: grid;
+    gap: 18px;
+}
+
 .ai-crm-metric,
 .ai-crm-panel {
     background: #fff;
@@ -111,6 +116,32 @@
     gap: 16px;
 }
 
+.ai-crm-panel summary {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    list-style: none;
+}
+
+.ai-crm-panel summary::-webkit-details-marker {
+    display: none;
+}
+
+.ai-crm-panel summary span {
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.ai-crm-panel summary small {
+    color: #64748b;
+}
+
+.ai-crm-lead-details[open] summary,
+.ai-crm-import-panel[open] summary {
+    margin-bottom: 18px;
+}
+
 .ai-crm-panel h2 {
     font-size: 20px;
     margin: 0 0 4px;
@@ -141,11 +172,29 @@
 .ai-crm-filters input,
 .ai-crm-filters select,
 .ai-crm-row-actions select,
+.ai-crm-bulk-bar select,
 .ai-crm-settings-form input,
 .ai-crm-settings-form select {
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     min-height: 38px;
+}
+
+.ai-crm-import-form {
+    display: grid;
+    gap: 12px;
+}
+
+.ai-crm-bulk-form {
+    margin-top: 12px;
+}
+
+.ai-crm-bulk-bar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
 }
 
 .ai-crm-full,
