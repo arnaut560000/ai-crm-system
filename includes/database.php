@@ -258,6 +258,56 @@ function ai_crm_get_stats() {
     );
 }
 
+function ai_crm_get_status_analytics() {
+    global $wpdb;
+
+    $table = ai_crm_table_name();
+    $rows = $wpdb->get_results("SELECT status, COUNT(*) AS lead_count, COALESCE(SUM(deal_value), 0) AS total_value FROM $table GROUP BY status");
+    $statuses = ai_crm_statuses();
+    $analytics = array();
+
+    foreach ($statuses as $key => $status) {
+        $analytics[$key] = array(
+            'key' => $key,
+            'label' => $status['label'],
+            'tone' => $status['tone'],
+            'count' => 0,
+            'value' => 0.0,
+        );
+    }
+
+    foreach ($rows as $row) {
+        $key = sanitize_key($row->status);
+        if (!isset($analytics[$key])) {
+            continue;
+        }
+
+        $analytics[$key]['count'] = (int) $row->lead_count;
+        $analytics[$key]['value'] = (float) $row->total_value;
+    }
+
+    return $analytics;
+}
+
+function ai_crm_get_followup_focus($limit = 5) {
+    global $wpdb;
+
+    $limit = min(10, max(1, absint($limit)));
+    $table = ai_crm_table_name();
+
+    return $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT id, name, email, company, status, next_follow_up
+            FROM $table
+            WHERE next_follow_up IS NOT NULL
+                AND status NOT IN ('won', 'lost')
+            ORDER BY next_follow_up ASC, updated_at DESC
+            LIMIT %d",
+            $limit
+        )
+    );
+}
+
 function ai_crm_drop_data() {
     global $wpdb;
 

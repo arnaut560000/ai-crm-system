@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.6.0
+
+- Added dashboard analytics for lead status distribution.
+- Added pipeline value chart grouped by status.
+- Added follow-up focus panel for upcoming and due follow-ups.
+- Improved import panel file input styling.
+- Improved settings checkbox alignment and layout polish.
+- Bumped the plugin asset version so browsers load the refreshed admin CSS.
+
 ## 1.5.1
 
 - Added release packaging documentation.

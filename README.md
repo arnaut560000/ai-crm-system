@@ -14,6 +14,8 @@ It is built as a simple first sellable version with lead capture, editing, statu
 - Search leads by name, email, company, or phone
 - Filter leads by status
 - Track deal value and follow-up dates
+- Dashboard analytics for status distribution and pipeline value
+- Follow-up focus panel for the next active follow-ups
 - Notes and activity history
 - Separate activity notes on lead records
 - CSV export
@@ -41,7 +43,9 @@ Add screenshots to the `screenshots/` folder before release:
 2. Add/edit lead form
 3. Leads table
 4. Settings page
-5. CSV export
+5. Import CSV panel
+6. Bulk actions
+7. Settings page
 
 ## Requirements
 
@@ -92,7 +96,7 @@ Before selling publicly, complete the checklist in `RELEASE_CHECKLIST.md`.
 - `docs/TESTING.md`
 - `docs/PRIVACY.md`
 - `docs/PRODUCT_PAGE_DRAFT.md`
-- `docs/RELEASE_NOTES_1.5.1.md`
+- `docs/RELEASE_NOTES_1.6.0.md`
 - `docs/SUPPORT.md`
 - `docs/KNOWN_LIMITATIONS.md`
 - `docs/SCREENSHOT_PLAN.md`

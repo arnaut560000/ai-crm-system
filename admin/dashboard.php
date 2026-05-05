@@ -18,6 +18,8 @@ function ai_crm_dashboard() {
     $edit_lead_id = absint($_GET['edit_lead'] ?? 0);
     $edit_lead = $edit_lead_id ? ai_crm_get_lead($edit_lead_id) : null;
     $activities = $edit_lead ? ai_crm_get_activities($edit_lead->id) : ai_crm_get_activities();
+    $status_analytics = ai_crm_get_status_analytics();
+    $followup_focus = ai_crm_get_followup_focus();
     $export_url = wp_nonce_url(ai_crm_admin_url(array('ai_crm_export' => 1, 's' => $search, 'status' => $current_status)), 'ai_crm_export');
     ?>
     <div class="wrap ai-crm-wrap">
@@ -42,6 +44,8 @@ function ai_crm_dashboard() {
             <?php ai_crm_metric('Pipeline Value', ai_crm_money($stats['pipeline']), 'Open value'); ?>
             <?php ai_crm_metric('Due Follow-ups', number_format_i18n($stats['followups']), 'Needs action'); ?>
         </section>
+
+        <?php ai_crm_render_analytics($status_analytics, $followup_focus, $stats); ?>
 
         <div class="ai-crm-grid">
             <section class="ai-crm-side-stack">
@@ -228,6 +232,105 @@ function ai_crm_metric($label, $value, $caption) {
         <strong><?php echo esc_html($value); ?></strong>
         <small><?php echo esc_html($caption); ?></small>
     </article>
+    <?php
+}
+
+function ai_crm_render_analytics($analytics, $followups, $stats) {
+    $max_count = 1;
+    $max_value = 1;
+
+    foreach ($analytics as $item) {
+        $max_count = max($max_count, (int) $item['count']);
+        $max_value = max($max_value, (float) $item['value']);
+    }
+    ?>
+    <section class="ai-crm-analytics" aria-label="<?php esc_attr_e('CRM analytics', 'ai-crm-system'); ?>">
+        <article class="ai-crm-panel ai-crm-chart-panel">
+            <div class="ai-crm-panel-heading">
+                <div>
+                    <h2><?php esc_html_e('Status Distribution', 'ai-crm-system'); ?></h2>
+                    <span><?php esc_html_e('Where every lead sits right now', 'ai-crm-system'); ?></span>
+                </div>
+            </div>
+            <div class="ai-crm-bars">
+                <?php foreach ($analytics as $item) : ?>
+                    <?php $width = max(6, round(((int) $item['count'] / $max_count) * 100)); ?>
+                    <div class="ai-crm-bar-row">
+                        <div class="ai-crm-bar-label">
+                            <span><?php echo esc_html($item['label']); ?></span>
+                            <strong><?php echo esc_html(number_format_i18n($item['count'])); ?></strong>
+                        </div>
+                        <div class="ai-crm-bar-track" aria-hidden="true">
+                            <span class="ai-crm-bar ai-crm-bar-<?php echo esc_attr($item['tone']); ?>" style="width: <?php echo esc_attr($width); ?>%;"></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </article>
+
+        <article class="ai-crm-panel ai-crm-chart-panel">
+            <div class="ai-crm-panel-heading">
+                <div>
+                    <h2><?php esc_html_e('Pipeline Value', 'ai-crm-system'); ?></h2>
+                    <span><?php esc_html_e('Deal value grouped by status', 'ai-crm-system'); ?></span>
+                </div>
+            </div>
+            <div class="ai-crm-bars">
+                <?php foreach ($analytics as $item) : ?>
+                    <?php $width = max(6, round(((float) $item['value'] / $max_value) * 100)); ?>
+                    <div class="ai-crm-bar-row">
+                        <div class="ai-crm-bar-label">
+                            <span><?php echo esc_html($item['label']); ?></span>
+                            <strong><?php echo esc_html(ai_crm_money($item['value'])); ?></strong>
+                        </div>
+                        <div class="ai-crm-bar-track" aria-hidden="true">
+                            <span class="ai-crm-bar ai-crm-bar-<?php echo esc_attr($item['tone']); ?>" style="width: <?php echo esc_attr($width); ?>%;"></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </article>
+
+        <article class="ai-crm-panel ai-crm-followup-panel">
+            <div class="ai-crm-panel-heading">
+                <div>
+                    <h2><?php esc_html_e('Follow-up Focus', 'ai-crm-system'); ?></h2>
+                    <span>
+                        <?php
+                        printf(
+                            esc_html(_n('%s due item', '%s due items', (int) $stats['followups'], 'ai-crm-system')),
+                            esc_html(number_format_i18n((int) $stats['followups']))
+                        );
+                        ?>
+                    </span>
+                </div>
+            </div>
+            <?php if ($followups) : ?>
+                <ul class="ai-crm-focus-list">
+                    <?php foreach ($followups as $lead) : ?>
+                        <?php
+                        $date_time = strtotime($lead->next_follow_up);
+                        $is_due = $date_time && $date_time <= current_time('timestamp');
+                        ?>
+                        <li>
+                            <div>
+                                <strong><?php echo esc_html($lead->name); ?></strong>
+                                <span><?php echo esc_html($lead->company ?: $lead->email); ?></span>
+                            </div>
+                            <a class="<?php echo esc_attr($is_due ? 'ai-crm-focus-date is-due' : 'ai-crm-focus-date'); ?>" href="<?php echo esc_url(ai_crm_admin_url(array('edit_lead' => absint($lead->id)))); ?>">
+                                <?php echo esc_html(date_i18n(get_option('date_format'), $date_time)); ?>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else : ?>
+                <div class="ai-crm-mini-empty">
+                    <strong><?php esc_html_e('No follow-ups scheduled', 'ai-crm-system'); ?></strong>
+                    <span><?php esc_html_e('Add dates to active leads to keep the pipeline moving.', 'ai-crm-system'); ?></span>
+                </div>
+            <?php endif; ?>
+        </article>
+    </section>
     <?php
 }
 
