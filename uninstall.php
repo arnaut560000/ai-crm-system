@@ -1,13 +1,6 @@
 <?php
-/**
- * Uninstall cleanup for AI CRM System.
- */
-
-if (!defined('WP_UNINSTALL_PLUGIN')) {
-    exit;
-}
-
 if (!defined('ABSPATH')) exit;
+if (!defined('WP_UNINSTALL_PLUGIN')) exit;
 
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/database.php';

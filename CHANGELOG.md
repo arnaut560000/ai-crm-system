@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+
+- Hard rebuilt all plugin PHP files with valid opening tags and direct-access guards.
+- Rebuilt the main plugin bootstrap file.
+- Rebuilt database, action handling, helper, dashboard, settings, CSS, uninstall, and documentation files.
+- Verified the plugin structure for fresh WordPress installs.
+
 ## 1.2.1
 
 - Refreshed the GitHub copy with a verified plugin bootstrap.

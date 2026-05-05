@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('ABSPATH')) exit;
 
 add_action('admin_init', 'ai_crm_handle_actions');
@@ -11,7 +10,7 @@ function ai_crm_handle_actions() {
 
     if (isset($_POST['ai_crm_save_lead'])) {
         check_admin_referer('ai_crm_save_lead');
-        ai_crm_save_lead();
+        ai_crm_save_lead($_POST);
         wp_safe_redirect(ai_crm_admin_url(array('message' => 'saved')));
         exit;
     }
@@ -19,14 +18,14 @@ function ai_crm_handle_actions() {
     if (isset($_POST['ai_crm_update_lead'])) {
         check_admin_referer('ai_crm_update_lead');
         $lead_id = absint($_POST['lead_id'] ?? 0);
-        ai_crm_update_lead($lead_id);
+        ai_crm_update_lead($lead_id, $_POST);
         wp_safe_redirect(ai_crm_admin_url(array('message' => 'updated', 'edit_lead' => $lead_id)));
         exit;
     }
 
     if (isset($_POST['ai_crm_update_status'])) {
         check_admin_referer('ai_crm_update_status');
-        ai_crm_update_status();
+        ai_crm_update_status(absint($_POST['lead_id'] ?? 0), sanitize_key($_POST['status'] ?? ''));
         wp_safe_redirect(ai_crm_admin_url(array('message' => 'updated')));
         exit;
     }
@@ -56,8 +55,6 @@ function ai_crm_export_csv() {
         wp_die(esc_html__('You do not have permission to export CRM data.', 'ai-crm-system'));
     }
 
-    $leads = ai_crm_get_leads();
-
     nocache_headers();
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename=ai-crm-leads-' . gmdate('Y-m-d') . '.csv');
@@ -65,8 +62,8 @@ function ai_crm_export_csv() {
     $output = fopen('php://output', 'w');
     fputcsv($output, array('Name', 'Email', 'Phone', 'Company', 'Status', 'Source', 'Deal Value', 'Next Follow-up', 'Notes', 'Created At', 'Updated At'));
 
-    foreach ($leads as $lead) {
-        $statuses = ai_crm_statuses();
+    $statuses = ai_crm_statuses();
+    foreach (ai_crm_get_leads() as $lead) {
         fputcsv($output, array(
             $lead->name,
             $lead->email,

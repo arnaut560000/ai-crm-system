@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('ABSPATH')) exit;
 
 function ai_crm_statuses() {
@@ -32,7 +31,8 @@ function ai_crm_get_settings() {
 
 function ai_crm_get_setting($key) {
     $settings = ai_crm_get_settings();
-    return $settings[$key] ?? ai_crm_default_settings()[$key] ?? null;
+    $defaults = ai_crm_default_settings();
+    return $settings[$key] ?? $defaults[$key] ?? null;
 }
 
 function ai_crm_admin_url($args = array()) {
@@ -54,6 +54,6 @@ function ai_crm_validate_status($status) {
         return $status;
     }
 
-    $default_status = sanitize_key((string) ai_crm_get_setting('default_status'));
-    return isset(ai_crm_statuses()[$default_status]) ? $default_status : 'new';
+    $default = sanitize_key((string) ai_crm_get_setting('default_status'));
+    return isset(ai_crm_statuses()[$default]) ? $default : 'new';
 }

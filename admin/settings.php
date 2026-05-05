@@ -1,5 +1,4 @@
 <?php
-
 if (!defined('ABSPATH')) exit;
 
 add_action('admin_init', 'ai_crm_register_settings');
@@ -18,12 +17,10 @@ function ai_crm_register_settings() {
 function ai_crm_sanitize_settings($input) {
     $defaults = ai_crm_default_settings();
     $input = is_array($input) ? $input : array();
-
     $currency = sanitize_text_field(wp_unslash($input['currency_symbol'] ?? $defaults['currency_symbol']));
-    $currency = $currency !== '' ? substr($currency, 0, 8) : $defaults['currency_symbol'];
 
     return array(
-        'currency_symbol' => $currency,
+        'currency_symbol' => $currency !== '' ? substr($currency, 0, 8) : $defaults['currency_symbol'],
         'default_status' => ai_crm_validate_status($input['default_status'] ?? $defaults['default_status']),
         'delete_data_on_uninstall' => !empty($input['delete_data_on_uninstall']) ? 1 : 0,
     );
@@ -35,14 +32,13 @@ function ai_crm_settings_page() {
     }
 
     $settings = ai_crm_get_settings();
-    $statuses = ai_crm_statuses();
     ?>
     <div class="wrap ai-crm-wrap">
         <section class="ai-crm-hero ai-crm-settings-hero">
             <div>
-                <p class="ai-crm-kicker">Configuration</p>
+                <p class="ai-crm-kicker"><?php esc_html_e('Configuration', 'ai-crm-system'); ?></p>
                 <h1><?php esc_html_e('AI CRM Settings', 'ai-crm-system'); ?></h1>
-                <p><?php esc_html_e('Keep the CRM simple while controlling the details that matter for your business.', 'ai-crm-system'); ?></p>
+                <p><?php esc_html_e('Set defaults for your CRM workspace.', 'ai-crm-system'); ?></p>
             </div>
         </section>
 
@@ -56,12 +52,10 @@ function ai_crm_settings_page() {
                 </label>
 
                 <label>
-                    <span><?php esc_html_e('Default Lead Status', 'ai-crm-system'); ?></span>
+                    <span><?php esc_html_e('Default Status', 'ai-crm-system'); ?></span>
                     <select name="ai_crm_settings[default_status]">
-                        <?php foreach ($statuses as $key => $status) : ?>
-                            <option value="<?php echo esc_attr($key); ?>" <?php selected($settings['default_status'], $key); ?>>
-                                <?php echo esc_html($status['label']); ?>
-                            </option>
+                        <?php foreach (ai_crm_statuses() as $key => $status) : ?>
+                            <option value="<?php echo esc_attr($key); ?>" <?php selected($settings['default_status'], $key); ?>><?php echo esc_html($status['label']); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -71,10 +65,7 @@ function ai_crm_settings_page() {
                     <span><?php esc_html_e('Delete CRM data when the plugin is uninstalled', 'ai-crm-system'); ?></span>
                 </label>
 
-                <p class="description">
-                    <?php esc_html_e('Leave uninstall cleanup off if you want leads to remain in the database after removing the plugin.', 'ai-crm-system'); ?>
-                </p>
-
+                <p class="description"><?php esc_html_e('Leave this off if you want to keep leads after uninstalling.', 'ai-crm-system'); ?></p>
                 <?php submit_button(__('Save Settings', 'ai-crm-system')); ?>
             </form>
         </section>
