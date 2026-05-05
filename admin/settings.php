@@ -23,6 +23,7 @@ function ai_crm_sanitize_settings($input) {
         'currency_symbol' => $currency !== '' ? substr($currency, 0, 8) : $defaults['currency_symbol'],
         'default_status' => ai_crm_validate_status($input['default_status'] ?? $defaults['default_status']),
         'delete_data_on_uninstall' => !empty($input['delete_data_on_uninstall']) ? 1 : 0,
+        'records_per_page' => min(100, max(10, absint($input['records_per_page'] ?? $defaults['records_per_page']))),
     );
 }
 
@@ -60,13 +61,20 @@ function ai_crm_settings_page() {
                     </select>
                 </label>
 
+                <label>
+                    <span><?php esc_html_e('Leads Per Page', 'ai-crm-system'); ?></span>
+                    <input type="number" name="ai_crm_settings[records_per_page]" value="<?php echo esc_attr($settings['records_per_page']); ?>" min="10" max="100" step="5">
+                </label>
+
                 <label class="ai-crm-checkbox">
                     <input type="checkbox" name="ai_crm_settings[delete_data_on_uninstall]" value="1" <?php checked((int) $settings['delete_data_on_uninstall'], 1); ?>>
                     <span><?php esc_html_e('Delete CRM data when the plugin is uninstalled', 'ai-crm-system'); ?></span>
                 </label>
 
                 <p class="description"><?php esc_html_e('Leave this off if you want to keep leads after uninstalling.', 'ai-crm-system'); ?></p>
-                <?php submit_button(__('Save Settings', 'ai-crm-system')); ?>
+                <p class="submit">
+                    <button type="submit" class="button button-primary"><?php esc_html_e('Save Settings', 'ai-crm-system'); ?></button>
+                </p>
             </form>
         </section>
     </div>

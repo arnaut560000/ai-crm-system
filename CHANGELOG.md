@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- Added paginated leads table with configurable records per page.
+- Added separate activity-note form for edited leads.
+- Added notes preview and due follow-up styling in the leads table.
+- Added safer shared filter helpers and lead count queries.
+- Added release readiness checklist.
+
 ## 1.3.0
 
 - Hard rebuilt all plugin PHP files with valid opening tags and direct-access guards.

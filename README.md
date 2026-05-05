@@ -13,8 +13,10 @@ It is built as a simple first sellable version with lead capture, editing, statu
 - Filter leads by status
 - Track deal value and follow-up dates
 - Notes and activity history
+- Separate activity notes on lead records
 - CSV export
 - Settings page for currency symbol and default status
+- Configurable leads per page
 - Optional delete-data-on-uninstall setting
 - Safe uninstall cleanup helper
 
@@ -59,6 +61,7 @@ Add screenshots to the `screenshots/` folder before release:
 11. Delete a test lead.
 12. Click `Export CSV` and confirm a CSV file downloads.
 13. Open `AI CRM > Settings`, change currency/default status, and save.
+14. Change `Leads Per Page` and confirm pagination behaves correctly after adding enough leads.
 
 ## Uninstall Behavior
 
@@ -72,3 +75,7 @@ CRM data is deleted only when:
 ## Changelog
 
 See `CHANGELOG.md`.
+
+## Release Readiness
+
+Before selling publicly, complete the checklist in `RELEASE_CHECKLIST.md`.

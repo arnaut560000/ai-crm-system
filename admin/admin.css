@@ -213,6 +213,15 @@
     text-decoration: none;
 }
 
+.ai-crm-due {
+    color: #be123c;
+    font-weight: 800;
+}
+
+.ai-crm-notes {
+    max-width: 210px;
+}
+
 .ai-crm-empty {
     border: 1px dashed #cbd5e1;
     border-radius: 8px;
@@ -230,6 +239,18 @@
     border-left: 3px solid #0f766e;
     margin: 0 0 12px;
     padding-left: 12px;
+}
+
+.ai-crm-activity-form {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.ai-crm-activity-form textarea {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    min-height: 82px;
 }
 
 .ai-crm-activity strong,
@@ -250,6 +271,33 @@
     align-items: center;
     display: flex !important;
     flex-direction: row;
+}
+
+.ai-crm-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.ai-crm-pagination a {
+    align-items: center;
+    background: #fff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #334155;
+    display: inline-flex;
+    font-weight: 700;
+    height: 34px;
+    justify-content: center;
+    min-width: 34px;
+    text-decoration: none;
+}
+
+.ai-crm-pagination a.is-active {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #fff;
 }
 
 @media (max-width: 1200px) {

@@ -53,6 +53,8 @@ function ai_crm_install() {
 
     if (!get_option('ai_crm_settings')) {
         add_option('ai_crm_settings', ai_crm_default_settings());
+    } else {
+        update_option('ai_crm_settings', ai_crm_get_settings());
     }
 }
 
@@ -159,12 +161,31 @@ function ai_crm_get_lead($lead_id) {
 function ai_crm_get_leads() {
     global $wpdb;
 
+    $query = ai_crm_build_leads_query();
+    $per_page = ai_crm_records_per_page();
+    $offset = (ai_crm_current_page() - 1) * $per_page;
+    $sql = $query['sql'] . ' ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d';
+    $params = array_merge($query['params'], array($per_page, $offset));
+
+    return $wpdb->get_results($wpdb->prepare($sql, $params));
+}
+
+function ai_crm_get_lead_count() {
+    global $wpdb;
+
+    $query = ai_crm_build_leads_query('COUNT(*)');
+    return (int) ($query['params'] ? $wpdb->get_var($wpdb->prepare($query['sql'], $query['params'])) : $wpdb->get_var($query['sql']));
+}
+
+function ai_crm_build_leads_query($select = '*') {
+    global $wpdb;
+
     $table = ai_crm_table_name();
     $where = array('1=1');
     $params = array();
-
-    $search = sanitize_text_field(wp_unslash($_GET['s'] ?? ''));
-    $status = sanitize_key($_GET['status'] ?? '');
+    $filters = ai_crm_get_filters();
+    $search = $filters['search'];
+    $status = $filters['status'];
 
     if ($search !== '') {
         $like = '%' . $wpdb->esc_like($search) . '%';
@@ -177,8 +198,10 @@ function ai_crm_get_leads() {
         $params[] = $status;
     }
 
-    $sql = "SELECT * FROM $table WHERE " . implode(' AND ', $where) . ' ORDER BY updated_at DESC, id DESC LIMIT 200';
-    return $params ? $wpdb->get_results($wpdb->prepare($sql, $params)) : $wpdb->get_results($sql);
+    return array(
+        'sql' => "SELECT $select FROM $table WHERE " . implode(' AND ', $where),
+        'params' => $params,
+    );
 }
 
 function ai_crm_add_activity($lead_id, $type, $note) {

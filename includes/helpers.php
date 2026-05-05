@@ -21,6 +21,7 @@ function ai_crm_default_settings() {
         'currency_symbol' => '$',
         'default_status' => 'new',
         'delete_data_on_uninstall' => 0,
+        'records_per_page' => 25,
     );
 }
 
@@ -56,4 +57,20 @@ function ai_crm_validate_status($status) {
 
     $default = sanitize_key((string) ai_crm_get_setting('default_status'));
     return isset(ai_crm_statuses()[$default]) ? $default : 'new';
+}
+
+function ai_crm_records_per_page() {
+    $per_page = absint(ai_crm_get_setting('records_per_page'));
+    return min(100, max(10, $per_page));
+}
+
+function ai_crm_current_page() {
+    return max(1, absint($_GET['paged'] ?? 1));
+}
+
+function ai_crm_get_filters() {
+    return array(
+        'search' => sanitize_text_field(wp_unslash($_GET['s'] ?? '')),
+        'status' => sanitize_key($_GET['status'] ?? ''),
+    );
 }

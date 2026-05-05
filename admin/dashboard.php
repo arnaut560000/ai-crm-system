@@ -9,10 +9,12 @@ function ai_crm_dashboard() {
     ai_crm_install();
 
     $leads = ai_crm_get_leads();
+    $lead_count = ai_crm_get_lead_count();
     $stats = ai_crm_get_stats();
     $statuses = ai_crm_statuses();
-    $search = sanitize_text_field(wp_unslash($_GET['s'] ?? ''));
-    $current_status = sanitize_key($_GET['status'] ?? '');
+    $filters = ai_crm_get_filters();
+    $search = $filters['search'];
+    $current_status = $filters['status'];
     $edit_lead_id = absint($_GET['edit_lead'] ?? 0);
     $edit_lead = $edit_lead_id ? ai_crm_get_lead($edit_lead_id) : null;
     $activities = $edit_lead ? ai_crm_get_activities($edit_lead->id) : ai_crm_get_activities();
@@ -115,7 +117,7 @@ function ai_crm_dashboard() {
                 <div class="ai-crm-panel-heading ai-crm-list-heading">
                     <div>
                         <h2><?php esc_html_e('Leads', 'ai-crm-system'); ?></h2>
-                        <span><?php echo esc_html(count($leads)); ?> <?php esc_html_e('visible records', 'ai-crm-system'); ?></span>
+                        <span><?php echo esc_html($lead_count); ?> <?php esc_html_e('matching records', 'ai-crm-system'); ?></span>
                     </div>
                     <form method="get" class="ai-crm-filters">
                         <input type="hidden" name="page" value="ai-crm">
@@ -142,6 +144,7 @@ function ai_crm_dashboard() {
                                     <th><?php esc_html_e('Value', 'ai-crm-system'); ?></th>
                                     <th><?php esc_html_e('Follow-up', 'ai-crm-system'); ?></th>
                                     <th><?php esc_html_e('Source', 'ai-crm-system'); ?></th>
+                                    <th><?php esc_html_e('Notes', 'ai-crm-system'); ?></th>
                                     <th><?php esc_html_e('Actions', 'ai-crm-system'); ?></th>
                                 </tr>
                             </thead>
@@ -158,6 +161,7 @@ function ai_crm_dashboard() {
                         <p><?php esc_html_e('Add your first lead or adjust the filters.', 'ai-crm-system'); ?></p>
                     </div>
                 <?php endif; ?>
+                <?php ai_crm_render_pagination($lead_count); ?>
             </section>
         </div>
     </div>
@@ -169,6 +173,7 @@ function ai_crm_render_notice() {
         'saved' => 'Lead saved.',
         'updated' => 'Lead updated.',
         'deleted' => 'Lead deleted.',
+        'activity_added' => 'Activity note added.',
     );
     $key = sanitize_key($_GET['message'] ?? '');
     if (isset($messages[$key])) {
@@ -199,6 +204,15 @@ function ai_crm_render_activity($activities, $edit_lead) {
     ?>
     <div class="ai-crm-activity">
         <h3><?php echo $edit_lead ? esc_html__('Lead Activity', 'ai-crm-system') : esc_html__('Recent Activity', 'ai-crm-system'); ?></h3>
+        <?php if ($edit_lead) : ?>
+            <form method="post" class="ai-crm-activity-form">
+                <?php wp_nonce_field('ai_crm_add_activity'); ?>
+                <input type="hidden" name="ai_crm_add_activity" value="1">
+                <input type="hidden" name="lead_id" value="<?php echo esc_attr($edit_lead->id); ?>">
+                <textarea name="activity_note" rows="3" placeholder="<?php esc_attr_e('Add a call note, meeting update, or next step', 'ai-crm-system'); ?>" required></textarea>
+                <button type="submit" class="button"><?php esc_html_e('Add Note', 'ai-crm-system'); ?></button>
+            </form>
+        <?php endif; ?>
         <?php if ($activities) : ?>
             <ul>
                 <?php foreach ($activities as $activity) : ?>
@@ -219,6 +233,8 @@ function ai_crm_render_activity($activities, $edit_lead) {
 function ai_crm_render_lead_row($lead, $statuses) {
     $status = $statuses[$lead->status] ?? $statuses['new'];
     $delete_url = wp_nonce_url(ai_crm_admin_url(array('ai_crm_delete' => absint($lead->id))), 'ai_crm_delete_' . absint($lead->id));
+    $follow_up_time = $lead->next_follow_up ? strtotime($lead->next_follow_up) : false;
+    $is_due = $follow_up_time && $follow_up_time <= current_time('timestamp');
     ?>
     <tr>
         <td>
@@ -228,8 +244,15 @@ function ai_crm_render_lead_row($lead, $statuses) {
         </td>
         <td><span class="ai-crm-status ai-crm-status-<?php echo esc_attr($status['tone']); ?>"><?php echo esc_html($status['label']); ?></span></td>
         <td><?php echo esc_html(ai_crm_money($lead->deal_value)); ?></td>
-        <td><?php echo $lead->next_follow_up ? esc_html(date_i18n(get_option('date_format'), strtotime($lead->next_follow_up))) : '<span class="ai-crm-muted">Not set</span>'; ?></td>
+        <td>
+            <?php if ($follow_up_time) : ?>
+                <span class="<?php echo esc_attr($is_due ? 'ai-crm-due' : ''); ?>"><?php echo esc_html(date_i18n(get_option('date_format'), $follow_up_time)); ?></span>
+            <?php else : ?>
+                <span class="ai-crm-muted"><?php esc_html_e('Not set', 'ai-crm-system'); ?></span>
+            <?php endif; ?>
+        </td>
         <td><?php echo esc_html($lead->source); ?></td>
+        <td class="ai-crm-notes"><?php echo esc_html(wp_trim_words((string) $lead->notes, 14)); ?></td>
         <td>
             <form method="post" class="ai-crm-row-actions">
                 <?php wp_nonce_field('ai_crm_update_status'); ?>
@@ -246,5 +269,30 @@ function ai_crm_render_lead_row($lead, $statuses) {
             </form>
         </td>
     </tr>
+    <?php
+}
+
+function ai_crm_render_pagination($lead_count) {
+    $per_page = ai_crm_records_per_page();
+    $total_pages = (int) ceil($lead_count / $per_page);
+    if ($total_pages < 2) {
+        return;
+    }
+
+    $current_page = ai_crm_current_page();
+    $filters = ai_crm_get_filters();
+    ?>
+    <nav class="ai-crm-pagination" aria-label="<?php esc_attr_e('Lead pagination', 'ai-crm-system'); ?>">
+        <?php for ($page = 1; $page <= $total_pages; $page++) : ?>
+            <?php
+            $url = ai_crm_admin_url(array_filter(array(
+                'paged' => $page,
+                's' => $filters['search'],
+                'status' => $filters['status'],
+            )));
+            ?>
+            <a class="<?php echo esc_attr($page === $current_page ? 'is-active' : ''); ?>" href="<?php echo esc_url($url); ?>"><?php echo esc_html($page); ?></a>
+        <?php endfor; ?>
+    </nav>
     <?php
 }

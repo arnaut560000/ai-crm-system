@@ -30,6 +30,14 @@ function ai_crm_handle_actions() {
         exit;
     }
 
+    if (isset($_POST['ai_crm_add_activity'])) {
+        check_admin_referer('ai_crm_add_activity');
+        $lead_id = absint($_POST['lead_id'] ?? 0);
+        ai_crm_add_activity($lead_id, 'note', sanitize_textarea_field(wp_unslash($_POST['activity_note'] ?? '')));
+        wp_safe_redirect(ai_crm_admin_url(array('message' => 'activity_added', 'edit_lead' => $lead_id)));
+        exit;
+    }
+
     if (isset($_GET['ai_crm_delete'], $_GET['_wpnonce'])) {
         $lead_id = absint($_GET['ai_crm_delete']);
         $nonce = sanitize_text_field(wp_unslash($_GET['_wpnonce']));
