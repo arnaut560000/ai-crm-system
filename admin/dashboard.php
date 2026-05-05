@@ -190,7 +190,7 @@ function ai_crm_text_field($name, $label, $value = '', $placeholder = '', $requi
     ?>
     <label>
         <span><?php echo esc_html($label); ?></span>
-        <input type="<?php echo esc_attr($type); ?>" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($value); ?>" placeholder="<?php echo esc_attr($placeholder); ?>" <?php required($required); ?>>
+        <input type="<?php echo esc_attr($type); ?>" name="<?php echo esc_attr($name); ?>" value="<?php echo esc_attr($value); ?>" placeholder="<?php echo esc_attr($placeholder); ?>" <?php echo $required ? 'required' : ''; ?>>
     </label>
     <?php
 }
