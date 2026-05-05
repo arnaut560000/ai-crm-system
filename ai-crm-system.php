@@ -1,14 +1,27 @@
 <?php
 /**
  * Plugin Name: AI CRM System
- * Description: Custom CRM system inside WordPress
- * Version: 1.0
+ * Description: A modern CRM workspace inside WordPress for tracking leads, pipeline status, follow-ups, and notes.
+ * Version: 1.1.0
  * Author: Arnaut
  */
 
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-// Add menu
+define('AI_CRM_VERSION', '1.1.0');
+define('AI_CRM_PLUGIN_FILE', __FILE__);
+define('AI_CRM_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('AI_CRM_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+require_once AI_CRM_PLUGIN_DIR . 'includes/helpers.php';
+require_once AI_CRM_PLUGIN_DIR . 'includes/database.php';
+require_once AI_CRM_PLUGIN_DIR . 'includes/actions.php';
+require_once AI_CRM_PLUGIN_DIR . 'admin/dashboard.php';
+
+register_activation_hook(__FILE__, 'ai_crm_install');
+
 add_action('admin_menu', function () {
     add_menu_page(
         'AI CRM',
@@ -21,43 +34,15 @@ add_action('admin_menu', function () {
     );
 });
 
-// Dashboard UI
-function ai_crm_dashboard() {
-    ?>
-    <div class="wrap">
-        <h1>AI CRM Dashboard</h1>
+add_action('admin_enqueue_scripts', function ($hook) {
+    if ($hook !== 'toplevel_page_ai-crm') {
+        return;
+    }
 
-        <h2>Add New Lead</h2>
-        <form method="post">
-            <input type="text" name="name" placeholder="Name" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <select name="status">
-                <option>New</option>
-                <option>Contacted</option>
-                <option>Closed</option>
-            </select>
-            <button type="submit" name="save_lead">Add Lead</button>
-        </form>
-
-        <hr>
-
-        <h2>Leads List</h2>
-        <table class="widefat">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Sample Client</td>
-                    <td>client@email.com</td>
-                    <td>New</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <?php
-}
+    wp_enqueue_style(
+        'ai-crm-admin',
+        AI_CRM_PLUGIN_URL . 'admin/admin.css',
+        array(),
+        AI_CRM_VERSION
+    );
+});
