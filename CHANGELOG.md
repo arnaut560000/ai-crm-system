@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+- Refreshed the GitHub copy with a verified plugin bootstrap.
+- Normalized PHP direct-access guards across plugin files.
+
 ## 1.2.0
 
 - Added settings page for currency, default status, and uninstall cleanup.

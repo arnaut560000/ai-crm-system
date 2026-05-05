@@ -1,8 +1,6 @@
 <?php
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 function ai_crm_table_name() {
     global $wpdb;

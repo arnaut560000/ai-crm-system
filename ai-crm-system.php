@@ -2,18 +2,16 @@
 /**
  * Plugin Name: AI CRM System
  * Description: A modern CRM workspace inside WordPress for tracking leads, pipeline status, follow-ups, and notes.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Arnaut
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: ai-crm-system
  */
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
-define('AI_CRM_VERSION', '1.2.0');
+define('AI_CRM_VERSION', '1.2.1');
 define('AI_CRM_PLUGIN_FILE', __FILE__);
 define('AI_CRM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_CRM_PLUGIN_URL', plugin_dir_url(__FILE__));

@@ -1,8 +1,6 @@
 <?php
 
-if (!defined('ABSPATH')) {
-    exit;
-}
+if (!defined('ABSPATH')) exit;
 
 add_action('admin_init', 'ai_crm_register_settings');
 
