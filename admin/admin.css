@@ -49,6 +49,27 @@
     white-space: nowrap;
 }
 
+.ai-crm-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.ai-crm-secondary-link {
+    border: 1px solid rgba(255, 255, 255, 0.42);
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 700;
+    padding: 11px 16px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ai-crm-secondary-link:hover {
+    color: #fff;
+}
+
 .ai-crm-metrics {
     display: grid;
     gap: 14px;
@@ -135,8 +156,14 @@
 }
 
 .ai-crm-full,
-.ai-crm-button {
+.ai-crm-form-actions {
     grid-column: 1 / -1;
+}
+
+.ai-crm-form-actions {
+    align-items: center;
+    display: flex;
+    gap: 10px;
 }
 
 .ai-crm-list-panel {
@@ -235,6 +262,66 @@
     margin-top: 0;
 }
 
+.ai-crm-activity {
+    border-top: 1px solid #e2e8f0;
+    margin-top: 22px;
+    padding-top: 18px;
+}
+
+.ai-crm-activity h3 {
+    margin: 0 0 12px;
+}
+
+.ai-crm-activity ul {
+    margin: 0;
+}
+
+.ai-crm-activity li {
+    border-left: 3px solid #0f766e;
+    margin: 0 0 12px;
+    padding-left: 12px;
+}
+
+.ai-crm-activity strong,
+.ai-crm-activity span,
+.ai-crm-activity small {
+    display: block;
+}
+
+.ai-crm-activity small {
+    color: #64748b;
+    margin-top: 3px;
+}
+
+.ai-crm-settings-panel {
+    max-width: 720px;
+}
+
+.ai-crm-settings-form {
+    display: grid;
+    gap: 18px;
+}
+
+.ai-crm-settings-form label {
+    display: grid;
+    gap: 7px;
+}
+
+.ai-crm-settings-form label span {
+    font-weight: 700;
+}
+
+.ai-crm-settings-form input[type="text"],
+.ai-crm-settings-form select {
+    max-width: 340px;
+}
+
+.ai-crm-checkbox {
+    align-items: center;
+    display: flex !important;
+    flex-direction: row;
+}
+
 @media (max-width: 1200px) {
     .ai-crm-grid,
     .ai-crm-metrics {
@@ -251,10 +338,11 @@
         margin-right: 10px;
     }
 
-    .ai-crm-hero,
-    .ai-crm-panel-heading,
-    .ai-crm-list-heading,
-    .ai-crm-filters {
+        .ai-crm-hero,
+        .ai-crm-hero-actions,
+        .ai-crm-panel-heading,
+        .ai-crm-list-heading,
+        .ai-crm-filters {
         align-items: stretch;
         flex-direction: column;
     }

@@ -9,13 +9,19 @@ function ai_crm_table_name() {
     return $wpdb->prefix . 'ai_crm_leads';
 }
 
+function ai_crm_activity_table_name() {
+    global $wpdb;
+    return $wpdb->prefix . 'ai_crm_activities';
+}
+
 function ai_crm_install() {
     global $wpdb;
 
-    $table = ai_crm_table_name();
+    $leads_table = ai_crm_table_name();
+    $activity_table = ai_crm_activity_table_name();
     $charset_collate = $wpdb->get_charset_collate();
 
-    $sql = "CREATE TABLE $table (
+    $leads_sql = "CREATE TABLE $leads_table (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         name VARCHAR(160) NOT NULL,
         email VARCHAR(190) NOT NULL,
@@ -34,53 +40,97 @@ function ai_crm_install() {
         KEY next_follow_up (next_follow_up)
     ) $charset_collate;";
 
+    $activity_sql = "CREATE TABLE $activity_table (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        lead_id BIGINT(20) UNSIGNED NOT NULL,
+        activity_type VARCHAR(40) NOT NULL DEFAULT 'note',
+        activity_note TEXT NOT NULL,
+        created_at DATETIME NOT NULL,
+        PRIMARY KEY  (id),
+        KEY lead_id (lead_id),
+        KEY activity_type (activity_type)
+    ) $charset_collate;";
+
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    dbDelta($sql);
+    dbDelta($leads_sql);
+    dbDelta($activity_sql);
+
+    if (!get_option('ai_crm_settings')) {
+        add_option('ai_crm_settings', ai_crm_default_settings());
+    }
 }
 
-function ai_crm_save_lead() {
-    global $wpdb;
-
-    $statuses = ai_crm_statuses();
-    $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'new';
-    if (!isset($statuses[$status])) {
-        $status = 'new';
-    }
-
-    $source = isset($_POST['source']) ? sanitize_text_field(wp_unslash($_POST['source'])) : 'Website';
+function ai_crm_prepare_lead_data($source_data) {
+    $source = isset($source_data['source']) ? sanitize_text_field(wp_unslash($source_data['source'])) : 'Website';
     if (!in_array($source, ai_crm_sources(), true)) {
         $source = 'Other';
     }
 
-    $next_follow_up = isset($_POST['next_follow_up']) ? sanitize_text_field(wp_unslash($_POST['next_follow_up'])) : '';
-    $next_follow_up = preg_match('/^\d{4}-\d{2}-\d{2}$/', $next_follow_up) ? $next_follow_up : null;
-
-    $wpdb->insert(
-        ai_crm_table_name(),
-        array(
-            'name' => sanitize_text_field(wp_unslash($_POST['name'] ?? '')),
-            'email' => sanitize_email(wp_unslash($_POST['email'] ?? '')),
-            'phone' => sanitize_text_field(wp_unslash($_POST['phone'] ?? '')),
-            'company' => sanitize_text_field(wp_unslash($_POST['company'] ?? '')),
-            'status' => $status,
-            'source' => $source,
-            'deal_value' => (float) ($_POST['deal_value'] ?? 0),
-            'next_follow_up' => $next_follow_up,
-            'notes' => sanitize_textarea_field(wp_unslash($_POST['notes'] ?? '')),
-            'created_at' => current_time('mysql'),
-            'updated_at' => current_time('mysql'),
-        ),
-        array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s')
+    return array(
+        'name' => sanitize_text_field(wp_unslash($source_data['name'] ?? '')),
+        'email' => sanitize_email(wp_unslash($source_data['email'] ?? '')),
+        'phone' => sanitize_text_field(wp_unslash($source_data['phone'] ?? '')),
+        'company' => sanitize_text_field(wp_unslash($source_data['company'] ?? '')),
+        'status' => ai_crm_validate_status($source_data['status'] ?? ''),
+        'source' => $source,
+        'deal_value' => (float) ($source_data['deal_value'] ?? 0),
+        'next_follow_up' => isset($source_data['next_follow_up']) ? ai_crm_clean_date($source_data['next_follow_up']) : null,
+        'notes' => sanitize_textarea_field(wp_unslash($source_data['notes'] ?? '')),
     );
+}
+
+function ai_crm_save_lead($source_data = null) {
+    global $wpdb;
+
+    $source_data = $source_data ?? $_POST;
+    $data = ai_crm_prepare_lead_data($source_data);
+    $data['created_at'] = current_time('mysql');
+    $data['updated_at'] = current_time('mysql');
+
+    $wpdb->insert(ai_crm_table_name(), $data, array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s'));
+
+    $lead_id = (int) $wpdb->insert_id;
+    if ($lead_id && $data['notes'] !== '') {
+        ai_crm_add_activity($lead_id, 'note', $data['notes']);
+    }
+
+    return $lead_id;
+}
+
+function ai_crm_update_lead($lead_id, $source_data = null) {
+    global $wpdb;
+
+    $lead_id = absint($lead_id);
+    if (!$lead_id) {
+        return false;
+    }
+
+    $source_data = $source_data ?? $_POST;
+    $data = ai_crm_prepare_lead_data($source_data);
+    $data['updated_at'] = current_time('mysql');
+
+    $updated = $wpdb->update(
+        ai_crm_table_name(),
+        $data,
+        array('id' => $lead_id),
+        array('%s', '%s', '%s', '%s', '%s', '%s', '%f', '%s', '%s', '%s'),
+        array('%d')
+    );
+
+    if ($updated !== false && $data['notes'] !== '') {
+        ai_crm_add_activity($lead_id, 'note', $data['notes']);
+    }
+
+    return $updated !== false;
 }
 
 function ai_crm_update_status() {
     global $wpdb;
 
     $lead_id = absint($_POST['lead_id'] ?? 0);
-    $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : '';
+    $status = ai_crm_validate_status($_POST['status'] ?? '');
 
-    if (!$lead_id || !isset(ai_crm_statuses()[$status])) {
+    if (!$lead_id) {
         return;
     }
 
@@ -94,12 +144,25 @@ function ai_crm_update_status() {
         array('%s', '%s'),
         array('%d')
     );
+
+    $statuses = ai_crm_statuses();
+    ai_crm_add_activity($lead_id, 'status', 'Status changed to ' . $statuses[$status]['label'] . '.');
 }
 
 function ai_crm_delete_lead($lead_id) {
     global $wpdb;
 
-    $wpdb->delete(ai_crm_table_name(), array('id' => absint($lead_id)), array('%d'));
+    $lead_id = absint($lead_id);
+    $wpdb->delete(ai_crm_activity_table_name(), array('lead_id' => $lead_id), array('%d'));
+    $wpdb->delete(ai_crm_table_name(), array('id' => $lead_id), array('%d'));
+}
+
+function ai_crm_get_lead($lead_id) {
+    global $wpdb;
+
+    return $wpdb->get_row(
+        $wpdb->prepare("SELECT * FROM " . ai_crm_table_name() . " WHERE id = %d", absint($lead_id))
+    );
 }
 
 function ai_crm_get_leads() {
@@ -132,6 +195,40 @@ function ai_crm_get_leads() {
     return $wpdb->get_results($sql);
 }
 
+function ai_crm_get_activities($lead_id = 0) {
+    global $wpdb;
+
+    $table = ai_crm_activity_table_name();
+    if ($lead_id) {
+        return $wpdb->get_results(
+            $wpdb->prepare("SELECT * FROM $table WHERE lead_id = %d ORDER BY created_at DESC, id DESC LIMIT 20", absint($lead_id))
+        );
+    }
+
+    return $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC, id DESC LIMIT 20");
+}
+
+function ai_crm_add_activity($lead_id, $type, $note) {
+    global $wpdb;
+
+    $lead_id = absint($lead_id);
+    $note = sanitize_textarea_field($note);
+    if (!$lead_id || $note === '') {
+        return false;
+    }
+
+    return $wpdb->insert(
+        ai_crm_activity_table_name(),
+        array(
+            'lead_id' => $lead_id,
+            'activity_type' => sanitize_key($type),
+            'activity_note' => $note,
+            'created_at' => current_time('mysql'),
+        ),
+        array('%d', '%s', '%s', '%s')
+    );
+}
+
 function ai_crm_get_stats() {
     global $wpdb;
 
@@ -143,4 +240,12 @@ function ai_crm_get_stats() {
     $followups = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE next_follow_up IS NOT NULL AND next_follow_up <= %s AND status NOT IN ('won', 'lost')", current_time('Y-m-d')));
 
     return compact('total', 'open', 'won', 'pipeline', 'followups');
+}
+
+function ai_crm_drop_data() {
+    global $wpdb;
+
+    $wpdb->query("DROP TABLE IF EXISTS " . ai_crm_activity_table_name());
+    $wpdb->query("DROP TABLE IF EXISTS " . ai_crm_table_name());
+    delete_option('ai_crm_settings');
 }
