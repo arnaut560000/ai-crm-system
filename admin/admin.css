@@ -107,14 +107,18 @@
 }
 
 .ai-crm-grid {
+    align-items: start;
     display: grid;
     gap: 18px;
     grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
 }
 
 .ai-crm-side-stack {
+    align-self: start;
+    align-items: start;
     display: grid;
     gap: 18px;
+    grid-auto-rows: max-content;
     align-content: start;
 }
 
@@ -183,7 +187,10 @@
 .ai-crm-lead-details:not([open]),
 .ai-crm-import-panel:not([open]) {
     align-self: start;
+    height: auto;
+    max-height: 72px;
     min-height: 0;
+    overflow: hidden;
     padding-bottom: 20px;
 }
 
