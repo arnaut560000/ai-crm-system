@@ -92,3 +92,7 @@ Before selling publicly, complete the checklist in `RELEASE_CHECKLIST.md`.
 - `docs/TESTING.md`
 - `docs/PRIVACY.md`
 - `docs/PRODUCT_PAGE_DRAFT.md`
+- `docs/RELEASE_NOTES_1.5.1.md`
+- `docs/SUPPORT.md`
+- `docs/KNOWN_LIMITATIONS.md`
+- `docs/SCREENSHOT_PLAN.md`

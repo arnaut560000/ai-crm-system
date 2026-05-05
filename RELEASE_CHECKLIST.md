@@ -30,5 +30,8 @@ Use this before packaging AI CRM System for a public beta or paid release.
 - Add real screenshots to `screenshots/`.
 - Create a release ZIP from the plugin folder.
 - Test the release ZIP on a clean WordPress install.
+- Extract the release ZIP and lint packaged PHP files.
 - Write a short product page and setup guide.
+- Capture screenshots using `docs/SCREENSHOT_PLAN.md`.
+- Publish release notes from `docs/RELEASE_NOTES_1.5.1.md`.
 - Decide whether this is a free beta, paid beta, or v1.0 release.
