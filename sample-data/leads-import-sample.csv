@@ -1,0 +1,3 @@
+name,email,phone,company,status,source,deal_value,next_follow_up,notes
+Jane Cooper,jane@example.com,+1 555 123 4567,Acme Studio,new,Website,2500,2026-06-15,Interested in a starter package
+Marcus Lee,marcus@example.com,+1 555 987 6543,Northwind Co,contacted,Referral,4800,2026-06-20,Asked for pricing and timeline

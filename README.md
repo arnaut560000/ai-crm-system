@@ -31,6 +31,8 @@ It is built as a simple first sellable version with lead capture, editing, statu
 5. Open `AI CRM` from the WordPress admin sidebar.
 6. Open `AI CRM > Settings` to configure currency, default status, and uninstall cleanup.
 
+For packaged installs, upload the release ZIP from `dist/` through `Plugins > Add New > Upload Plugin`.
+
 ## Screenshots
 
 Add screenshots to the `screenshots/` folder before release:
@@ -83,3 +85,10 @@ See `CHANGELOG.md`.
 ## Release Readiness
 
 Before selling publicly, complete the checklist in `RELEASE_CHECKLIST.md`.
+
+## Documentation
+
+- `docs/INSTALLATION.md`
+- `docs/TESTING.md`
+- `docs/PRIVACY.md`
+- `docs/PRODUCT_PAGE_DRAFT.md`

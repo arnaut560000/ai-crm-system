@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.1
+
+- Added release packaging documentation.
+- Added WordPress plugin readme metadata.
+- Added privacy, testing, installation, and product-page draft docs.
+- Added sample CSV import file.
+- Added distributable ZIP build output.
+
 ## 1.5.0
 
 - Added CSV import from the dashboard.
