@@ -203,17 +203,21 @@ function ai_crm_dashboard() {
 
 function ai_crm_render_notice() {
     $messages = array(
-        'saved' => 'Lead saved.',
-        'updated' => 'Lead updated.',
-        'deleted' => 'Lead deleted.',
-        'activity_added' => 'Activity note added.',
-        'bulk_updated' => 'Bulk action completed.',
-        'imported' => 'CSV import completed.',
-        'import_failed' => 'CSV import failed. Check the file format.',
+        'saved' => array('text' => 'Lead saved.', 'type' => 'success'),
+        'updated' => array('text' => 'Lead updated.', 'type' => 'success'),
+        'deleted' => array('text' => 'Lead deleted.', 'type' => 'success'),
+        'activity_added' => array('text' => 'Activity note added.', 'type' => 'success'),
+        'bulk_updated' => array('text' => 'Bulk action completed.', 'type' => 'success'),
+        'imported' => array('text' => 'CSV import completed.', 'type' => 'success'),
+        'import_failed' => array('text' => 'CSV import failed. Check the file format.', 'type' => 'error'),
     );
     $key = sanitize_key($_GET['message'] ?? '');
     if (isset($messages[$key])) {
-        echo '<div class="notice notice-success is-dismissible"><p>' . esc_html($messages[$key]) . '</p></div>';
+        $notice = $messages[$key];
+        echo '<div class="ai-crm-alert ai-crm-alert-' . esc_attr($notice['type']) . '" role="status">';
+        echo '<span class="ai-crm-alert-dot" aria-hidden="true"></span>';
+        echo '<p>' . esc_html($notice['text']) . '</p>';
+        echo '</div>';
     }
 }
 
