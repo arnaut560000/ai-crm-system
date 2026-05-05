@@ -115,6 +115,7 @@
 .ai-crm-side-stack {
     display: grid;
     gap: 18px;
+    align-content: start;
 }
 
 .ai-crm-metric,
@@ -152,10 +153,12 @@
 }
 
 .ai-crm-panel summary {
+    align-items: center;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
     list-style: none;
+    min-height: 26px;
 }
 
 .ai-crm-panel summary::-webkit-details-marker {
@@ -175,6 +178,13 @@
 .ai-crm-lead-details[open] summary,
 .ai-crm-import-panel[open] summary {
     margin-bottom: 18px;
+}
+
+.ai-crm-lead-details:not([open]),
+.ai-crm-import-panel:not([open]) {
+    align-self: start;
+    min-height: 0;
+    padding-bottom: 20px;
 }
 
 .ai-crm-panel h2 {
