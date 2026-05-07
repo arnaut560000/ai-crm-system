@@ -77,10 +77,27 @@ function ai_crm_prepare_lead_data($data) {
     );
 }
 
+function ai_crm_validate_lead_data($lead) {
+    if (empty($lead['name'])) {
+        return new WP_Error('ai_crm_missing_name', __('Lead name is required.', 'ai-crm-system'));
+    }
+
+    if (empty($lead['email']) || !is_email($lead['email'])) {
+        return new WP_Error('ai_crm_invalid_email', __('A valid lead email is required.', 'ai-crm-system'));
+    }
+
+    return true;
+}
+
 function ai_crm_save_lead($data = null) {
     global $wpdb;
 
     $lead = ai_crm_prepare_lead_data($data ?? $_POST);
+    $validation = ai_crm_validate_lead_data($lead);
+    if (is_wp_error($validation)) {
+        return $validation;
+    }
+
     $lead['created_at'] = current_time('mysql');
     $lead['updated_at'] = current_time('mysql');
 
@@ -103,6 +120,11 @@ function ai_crm_update_lead($lead_id, $data = null) {
     }
 
     $lead = ai_crm_prepare_lead_data($data ?? $_POST);
+    $validation = ai_crm_validate_lead_data($lead);
+    if (is_wp_error($validation)) {
+        return $validation;
+    }
+
     $lead['updated_at'] = current_time('mysql');
 
     $updated = $wpdb->update(

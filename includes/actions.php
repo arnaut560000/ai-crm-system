@@ -10,16 +10,18 @@ function ai_crm_handle_actions() {
 
     if (isset($_POST['ai_crm_save_lead'])) {
         check_admin_referer('ai_crm_save_lead');
-        ai_crm_save_lead($_POST);
-        wp_safe_redirect(ai_crm_admin_url(array('message' => 'saved')));
+        $result = ai_crm_save_lead($_POST);
+        $message = is_wp_error($result) ? 'lead_invalid' : 'saved';
+        wp_safe_redirect(ai_crm_admin_url(array('message' => $message)));
         exit;
     }
 
     if (isset($_POST['ai_crm_update_lead'])) {
         check_admin_referer('ai_crm_update_lead');
         $lead_id = absint($_POST['lead_id'] ?? 0);
-        ai_crm_update_lead($lead_id, $_POST);
-        wp_safe_redirect(ai_crm_admin_url(array('message' => 'updated', 'edit_lead' => $lead_id)));
+        $result = ai_crm_update_lead($lead_id, $_POST);
+        $message = is_wp_error($result) || !$result ? 'lead_invalid' : 'updated';
+        wp_safe_redirect(ai_crm_admin_url(array_filter(array('message' => $message, 'edit_lead' => $lead_id))));
         exit;
     }
 
@@ -162,7 +164,7 @@ function ai_crm_import_csv() {
             continue;
         }
 
-        ai_crm_save_lead(array(
+        $result = ai_crm_save_lead(array(
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'] ?? '',
@@ -173,7 +175,9 @@ function ai_crm_import_csv() {
             'next_follow_up' => $data['next_follow_up'] ?? '',
             'notes' => $data['notes'] ?? '',
         ));
-        $imported++;
+        if (!is_wp_error($result) && $result) {
+            $imported++;
+        }
     }
 
     fclose($handle);

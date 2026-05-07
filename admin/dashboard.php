@@ -214,6 +214,7 @@ function ai_crm_render_notice() {
         'bulk_updated' => array('text' => 'Bulk action completed.', 'type' => 'success'),
         'imported' => array('text' => 'CSV import completed.', 'type' => 'success'),
         'import_failed' => array('text' => 'CSV import failed. Check the file format.', 'type' => 'error'),
+        'lead_invalid' => array('text' => 'Lead name and a valid email are required.', 'type' => 'error'),
     );
     $key = sanitize_key($_GET['message'] ?? '');
     if (isset($messages[$key])) {

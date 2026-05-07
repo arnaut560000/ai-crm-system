@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.2
+
+- Added server-side lead validation for required name and valid email.
+- Added a clean dashboard error notice when lead form data is invalid.
+- Improved CSV import handling so invalid rows are skipped instead of creating bad records.
+
 ## 1.6.1
 
 - Reworked dashboard analytics so status distribution shows lead mix percentages and active/won/lost health.
