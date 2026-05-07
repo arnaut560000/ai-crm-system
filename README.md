@@ -90,6 +90,10 @@ See `CHANGELOG.md`.
 
 Before selling publicly, complete the checklist in `RELEASE_CHECKLIST.md`.
 
+## Product Page Copy
+
+Buyer-facing product page copy is available in `docs/PRODUCT_PAGE_DRAFT.md`. You can paste it into a WordPress Page and add screenshots before selling.
+
 ## Documentation
 
 - `docs/INSTALLATION.md`
